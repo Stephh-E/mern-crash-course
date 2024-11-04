@@ -3,12 +3,24 @@
 import express from 'express';
 import dotenv from "dotenv";
 import { connectDB } from './config/db.js';
+import Product from './models/product.js';
 
 dotenv.config();
 
 const app = express();
 
 app.use(express.json()); //allows us to accept JSON data in the req.body
+
+app.get("/api/products", async (request, response) => {
+    try{
+        const products = await Product.find({});
+        response.status(200).json({ success: true, data: products });
+    } catch (error) {
+      console.log("error in fetching products", error.message);
+      response.status(500).json({ success:false, message: "Server Error" });
+
+    }
+});
 
 app.post("/api/products", async  (request, response) => {
     const product = request.body; // user will send this data
@@ -30,7 +42,14 @@ app.post("/api/products", async  (request, response) => {
 
 app.delete("/api/products/:id", async (request, response) => {
     const {id} = request.params
-    console.log("id", id);
+
+    try {
+    await Product.findByIdAndDelete(id);
+    reponse.status(200).json({success: true, message: "Product deleted"});
+    }catch (error) {
+    console.log("error in deleting product", error.message);
+    response.status(404).json({ success:false, message: "Product not found" });
+    }
 });
 
 
