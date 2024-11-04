@@ -4,6 +4,7 @@ import express from 'express';
 import dotenv from "dotenv";
 import { connectDB } from './config/db.js';
 import Product from './models/product.js';
+import mongoose from 'mongoose';
 
 dotenv.config();
 
@@ -40,6 +41,23 @@ app.post("/api/products", async  (request, response) => {
     }
 });
 
+app.put("/api/products/:id", async (request, response) => {
+    const { id } = request.params;
+
+    const product = request.body;
+
+    if(!mongoose.Types.ObjectId.isValid(id)) {
+        return response.status(404).json({ success: false, message: "Invalid Product Id"});
+    }
+
+    try{
+       const updatedProduct =  await Product.findByIdAndUpdate(id, product,{new:true});
+       response.status(200).json({ success: true, data: updatedProduct });
+    } catch(error){
+      response.status(500).json({ sucess: false, message: "Server Error " });
+    }
+});
+
 app.delete("/api/products/:id", async (request, response) => {
     const {id} = request.params
 
@@ -51,8 +69,6 @@ app.delete("/api/products/:id", async (request, response) => {
     response.status(404).json({ success:false, message: "Product not found" });
     }
 });
-
-
 
 app.listen(8080, () => {
     connectDB();
