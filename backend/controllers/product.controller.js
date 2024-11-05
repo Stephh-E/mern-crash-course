@@ -45,3 +45,19 @@ export const updateProduct = async (request, response) => {
     response.status(500).json({ sucess: false, message: "Server Error " });
   }
 };
+
+export const deleteProduct = async (request, response) => {
+  const {id} = request.params;
+
+  if(!mongoose.Types.ObjectId.isValid(id)) {
+    return response.status(404).json({ success: false, message: "Invalid Product Id"});
+}
+
+  try {
+  await Product.findByIdAndDelete(id);
+  response.status(200).json({success: true, message: "Product deleted"});
+  }catch (error) {
+  console.log("error in deleting product", error.message);
+  response.status(500).json({ success:false, message: "Server Error" });
+  }
+};
